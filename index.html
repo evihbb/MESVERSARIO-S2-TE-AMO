@@ -3,134 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Diáriiio - Mesversário</title>
-
+    <title>Nosso Calendário ❤️</title>
     <style>
-        body {
-            background: #111;
-            color: white;
-            text-align: center;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            padding: 20px;
+        body { 
+            background: #111; 
+            color: white; 
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
         }
+        
+        h1 { color: #ff4d6d; margin-bottom: 5px; }
+        p { color: #888; margin-bottom: 30px; }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, 80px);
-            gap: 12px;
+            /* Quadrados de 110px para dar um destaque legal */
+            grid-template-columns: repeat(auto-fit, 110px);
+            gap: 20px;
             justify-content: center;
-            max-width: 500px;
-            margin: 20px auto;
+            max-width: 900px;
+            margin: 0 auto;
+            perspective: 1000px; /* Cria a profundidade para o giro 3D */
         }
 
-        .day {
-            width: 80px;
-            height: 80px;
-            background: #222;
-            border-radius: 12px;
+        /* Estrutura do Card (O container do giro) */
+        .day-card {
+            width: 110px;
+            height: 110px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        /* Classe que faz o card virar */
+        .day-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Comum para as duas faces */
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* Esconde a face de trás enquanto vira */
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            transition: 0.3s;
-            position: relative;
-            border: 2px solid transparent;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Disponível (Hoje e dias passados não coletados) */
-        .active {
-            border-color: #ff4d6d; /* Cor mais romântica */
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 77, 109, 0.2);
-        }
-        .active:hover {
-            transform: scale(1.05);
-            background: #333;
-        }
-
-        /* Já coletado */
-        .collected {
-            background: #ff4d6d;
-            color: white;
-            border-color: #ff4d6d;
-        }
-        .collected::after {
-            content: "❤️";
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            font-size: 12px;
-        }
-
-        /* Dias futuros (Bloqueados) */
-        .locked {
+        /* FRENTE: Onde fica o número */
+        .front {
             background: #222;
-            opacity: 0.3;
-            cursor: not-allowed;
+            border: 2px solid #333;
+            color: #ff4d6d;
         }
 
-        h1 { color: #ff4d6d; }
-        p { color: #888; }
+        /* Estilo para dias clicáveis (Hoje e Passados) */
+        .active .front {
+            border-color: #ff4d6d;
+            background: #2a2a2a;
+        }
+
+        /* VERSO: Onde a foto vai aparecer */
+        .back {
+            background: #ff4d6d; /* Cor temporária até você por as fotos */
+            color: white;
+            transform: rotateY(180deg);
+            overflow: hidden;
+        }
+
+        /* Estilo para a imagem (quando você colocar) */
+        .back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Dias Bloqueados (Futuros) */
+        .locked {
+            opacity: 0.2;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
     </style>
 </head>
 <body>
 
-    <h1> Mêsversário S2</h1>
-    <p id="status-msg">Clique nos dias para coletar seus mimos!</p>
-    
-    <div class="grid" id="grid"></div>
-
-    <script>
-        const agora = new Date();
-        const hojeNum = agora.getDate();
-        const mesAtual = agora.getMonth();
-        const grid = document.getElementById("grid");
-
-        // Carrega os dados ou cria um novo se o mês mudou
-        let dados = JSON.parse(localStorage.getItem("recompensas_v3")) || { mes: mesAtual, coletados: [] };
-
-        if (dados.mes !== mesAtual) {
-            dados = { mes: mesAtual, coletados: [] };
-            localStorage.setItem("recompensas_v3", JSON.stringify(dados));
-        }
-
-        function renderizar() {
-            grid.innerHTML = "";
-            for (let i = 1; i <= 30; i++) {
-                const div = document.createElement("div");
-                div.classList.add("day");
-                div.innerText = i;
-
-                const jaColetou = dados.coletados.includes(i);
-
-                if (jaColetou) {
-                    div.classList.add("collected");
-                } 
-                else if (i <= hojeNum) { 
-                    // MUDANÇA AQUI: Libera se o dia for menor ou igual a hoje
-                    div.classList.add("active");
-                    div.onclick = () => coletar(i);
-                } 
-                else {
-                    div.classList.add("locked");
-                }
-
-                grid.appendChild(div);
-            }
-        }
-
-        function coletar(dia) {
-            if (!dados.coletados.includes(dia)) {
-                dados.coletados.push(dia);
-                localStorage.setItem("recompensas_v3", JSON.stringify(dados));
-                
-                document.getElementById("status-msg").innerText = "Dia " + dia + " resgatado com sucesso! 😍";
-                renderizar();
-            }
-        }
-
-        renderizar();
-    </script>
-
-</body>
-</html>
+    <h1>
