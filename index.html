@@ -5,95 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Calendário ❤️</title>
     <style>
-        body { 
-            background: #111; 
-            color: white; 
-            text-align: center; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding: 20px; 
-        }
+        body { background: #111; color: white; text-align: center; font-family: sans-serif; padding: 20px; }
+        h1 { color: #ff4d6d; }
         
-        h1 { color: #ff4d6d; margin-bottom: 5px; }
-        p { color: #888; margin-bottom: 30px; }
-
         .grid {
             display: grid;
-            /* Quadrados de 110px para dar um destaque legal */
             grid-template-columns: repeat(auto-fit, 110px);
             gap: 20px;
             justify-content: center;
             max-width: 900px;
             margin: 0 auto;
-            perspective: 1000px; /* Cria a profundidade para o giro 3D */
+            perspective: 1000px; 
         }
 
-        /* Estrutura do Card (O container do giro) */
         .day-card {
             width: 110px;
             height: 110px;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s;
             cursor: pointer;
         }
 
-        /* Classe que faz o card virar */
-        .day-card.flipped {
+        /* A mágica do giro */
+        .flipped {
             transform: rotateY(180deg);
         }
 
-        /* Comum para as duas faces */
         .front, .back {
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden; /* Esconde a face de trás enquanto vira */
+            backface-visibility: hidden;
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 1.4rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* FRENTE: Onde fica o número */
         .front {
             background: #222;
-            border: 2px solid #333;
+            border: 2px solid #444;
             color: #ff4d6d;
         }
 
-        /* Estilo para dias clicáveis (Hoje e Passados) */
-        .active .front {
-            border-color: #ff4d6d;
-            background: #2a2a2a;
-        }
+        .active .front { border-color: #ff4d6d; }
 
-        /* VERSO: Onde a foto vai aparecer */
         .back {
-            background: #ff4d6d; /* Cor temporária até você por as fotos */
+            background: #ff4d6d;
             color: white;
             transform: rotateY(180deg);
-            overflow: hidden;
         }
 
-        /* Estilo para a imagem (quando você colocar) */
-        .back img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Dias Bloqueados (Futuros) */
-        .locked {
-            opacity: 0.2;
-            cursor: not-allowed;
-            filter: grayscale(1);
-        }
-
+        .locked { opacity: 0.2; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <h1>
+    <h1>🎁 Mêsversário S2</h1>
+    <p id="status-msg">Toque para virar!</p>
+    
+    <div class="grid" id="grid"></div>
+
+    <script>
+        const hojeNum = new Date().getDate();
+        const grid = document.getElementById("grid");
+
+        // Usei v_final para forçar o reset do teste anterior
+        let dados = JSON.parse(localStorage.getItem("recompensas_v_final")) || { coletados: [] };
+
+        function renderizar() {
+            grid.innerHTML = "";
+            for (let i = 1; i <= 30; i++) {
+                const card = document.createElement("div");
+                card.className = "day-card";
+                
+                const jaAbriu = dados.coletados.includes(i);
+                if (jaAbriu) card.classList.add("flipped");
+
+                if (i <= hojeNum) {
+                    card.classList.add("active");
+                    card.onclick = () => {
+                        if (!dados.coletados.includes(i)) {
+                            dados.coletados.push(i);
+                            localStorage.setItem("recompensas_v_final", JSON.stringify(dados));
+                            card.classList.add("flipped");
+                        }
+                    };
+                } else {
+                    card.classList.add("locked");
+                }
+
+                card.innerHTML = `
+                    <div class="front">${i}</div>
+                    <div class="back">❤️</div>
+                `;
+
+                grid.appendChild(card);
+            }
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>
