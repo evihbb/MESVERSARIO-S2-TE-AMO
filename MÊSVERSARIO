@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Diário Pro</title>
+
+    <style>
+        body {
+            background: #111;
+            color: white;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 80px);
+            gap: 15px;
+            justify-content: center;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .day {
+            width: 80px;
+            height: 80px;
+            background: #222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        /* Dia disponível para coletar hoje */
+        .active {
+            border-color: gold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        .active:hover {
+            transform: scale(1.1);
+            background: #333;
+        }
+
+        /* Dias que já foram coletados */
+        .collected {
+            background: #4CAF50;
+            color: white;
+        }
+        .collected::after {
+            content: "✓";
+            position: absolute;
+            bottom: 5px;
+            right: 8px;
+            font-size: 12px;
+        }
+
+        /* Dias futuros ou não coletados que passaram */
+        .locked {
+            background: #333;
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        h1 { margin-bottom: 5px; }
+        p { color: #888; margin-bottom: 25px; }
+    </style>
+</head>
+<body>
+
+    <h1>🎁 Recompensas Diárias</h1>
+    <p id="status-msg">Colete sua recompensa de hoje!</p>
+    
+    <div class="grid" id="grid"></div>
+
+    <script>
+        const agora = new Date();
+        const hojeNum = agora.getDate();
+        const mesAtual = agora.getMonth();
+        const grid = document.getElementById("grid");
+
+        // Estrutura de dados: { mes: 2, coletados: [1, 2] }
+        let dados = JSON.parse(localStorage.getItem("recompensas_v2")) || { mes: mesAtual, coletados: [] };
+
+        // Resetar se mudar o mês
+        if (dados.mes !== mesAtual) {
+            dados = { mes: mesAtual, coletados: [] };
+            localStorage.setItem("recompensas_v2", JSON.stringify(dados));
+        }
+
+        function renderizar() {
+            grid.innerHTML = "";
+            for (let i = 1; i <= 30; i++) {
+                const div = document.createElement("div");
+                div.classList.add("day");
+                div.innerText = i;
+
+                const jaColetou = dados.coletados.includes(i);
+
+                if (jaColetou) {
+                    div.classList.add("collected");
+                } 
+                else if (i === hojeNum) {
+                    // Apenas o dia de HOJE fica clicável
+                    div.classList.add("active");
+                    div.onclick = () => coletar(i);
+                } 
+                else {
+                    // Dias passados não coletados ou dias futuros
+                    div.classList.add("locked");
+                }
+
+                grid.appendChild(div);
+            }
+        }
+
+        function coletar(dia) {
+            if (!dados.coletados.includes(dia)) {
+                dados.coletados.push(dia);
+                localStorage.setItem("recompensas_v2", JSON.stringify(dados));
+                
+                // Feedback visual
+                document.getElementById("status-msg").innerText = "Recompensa do dia " + dia + " resgatada!";
+                renderizar();
+            }
+        }
+
+        renderizar();
+    </script>
+
+</body>
+</html>
