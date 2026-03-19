@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Diário Pro</title>
+    <title>Login Diário - Mesversário</title>
 
     <style>
         body {
             background: #111;
             color: white;
             text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, 80px);
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 20px auto;
         }
 
         .day {
@@ -33,50 +32,51 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             position: relative;
             border: 2px solid transparent;
         }
 
-        /* Dia disponível para coletar hoje */
+        /* Disponível (Hoje e dias passados não coletados) */
         .active {
-            border-color: gold;
+            border-color: #ff4d6d; /* Cor mais romântica */
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 77, 109, 0.2);
         }
         .active:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             background: #333;
         }
 
-        /* Dias que já foram coletados */
+        /* Já coletado */
         .collected {
-            background: #4CAF50;
+            background: #ff4d6d;
             color: white;
+            border-color: #ff4d6d;
         }
         .collected::after {
-            content: "✓";
+            content: "❤️";
             position: absolute;
             bottom: 5px;
-            right: 8px;
+            right: 5px;
             font-size: 12px;
         }
 
-        /* Dias futuros ou não coletados que passaram */
+        /* Dias futuros (Bloqueados) */
         .locked {
-            background: #333;
-            opacity: 0.4;
+            background: #222;
+            opacity: 0.3;
             cursor: not-allowed;
         }
 
-        h1 { margin-bottom: 5px; }
-        p { color: #888; margin-bottom: 25px; }
+        h1 { color: #ff4d6d; }
+        p { color: #888; }
     </style>
 </head>
 <body>
 
-    <h1>🎁 Recompensas Diárias</h1>
-    <p id="status-msg">Colete sua recompensa de hoje!</p>
+    <h1> Mêsversário S2</h1>
+    <p id="status-msg">Clique nos dias para coletar seus mimos!</p>
     
     <div class="grid" id="grid"></div>
 
@@ -86,13 +86,12 @@
         const mesAtual = agora.getMonth();
         const grid = document.getElementById("grid");
 
-        // Estrutura de dados: { mes: 2, coletados: [1, 2] }
-        let dados = JSON.parse(localStorage.getItem("recompensas_v2")) || { mes: mesAtual, coletados: [] };
+        // Carrega os dados ou cria um novo se o mês mudou
+        let dados = JSON.parse(localStorage.getItem("recompensas_v3")) || { mes: mesAtual, coletados: [] };
 
-        // Resetar se mudar o mês
         if (dados.mes !== mesAtual) {
             dados = { mes: mesAtual, coletados: [] };
-            localStorage.setItem("recompensas_v2", JSON.stringify(dados));
+            localStorage.setItem("recompensas_v3", JSON.stringify(dados));
         }
 
         function renderizar() {
@@ -107,13 +106,12 @@
                 if (jaColetou) {
                     div.classList.add("collected");
                 } 
-                else if (i === hojeNum) {
-                    // Apenas o dia de HOJE fica clicável
+                else if (i <= hojeNum) { 
+                    // MUDANÇA AQUI: Libera se o dia for menor ou igual a hoje
                     div.classList.add("active");
                     div.onclick = () => coletar(i);
                 } 
                 else {
-                    // Dias passados não coletados ou dias futuros
                     div.classList.add("locked");
                 }
 
@@ -124,10 +122,9 @@
         function coletar(dia) {
             if (!dados.coletados.includes(dia)) {
                 dados.coletados.push(dia);
-                localStorage.setItem("recompensas_v2", JSON.stringify(dados));
+                localStorage.setItem("recompensas_v3", JSON.stringify(dados));
                 
-                // Feedback visual
-                document.getElementById("status-msg").innerText = "Recompensa do dia " + dia + " resgatada!";
+                document.getElementById("status-msg").innerText = "Dia " + dia + " resgatado com sucesso! 😍";
                 renderizar();
             }
         }
