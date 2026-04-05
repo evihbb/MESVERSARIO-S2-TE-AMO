@@ -1,121 +1,148 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Calendário ❤️</title>
     <style>
-        body { background: #111; color: white; text-align: center; font-family: sans-serif; padding: 20px; }
-        h1 { color: #ff4d6d; }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, 280px);
-            gap: 20px;
-            justify-content: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            perspective: 4000px; 
+        body { 
+            background: #111; 
+            color: white; 
+            text-align: center; 
+            font-family: sans-serif; 
+            padding: 20px; 
         }
 
-        .day-card {
-            width: 280px;
-            height:280px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s;
-            cursor: pointer;
-        }
+```
+    h1 { color: #ff4d6d; }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 280px);
+        gap: 20px;
+        justify-content: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        perspective: 4000px; 
+    }
 
-        .flipped {
-            transform: rotateY(180deg);
-        }
+    .day-card {
+        width: 280px;
+        height: 280px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.6s;
+        cursor: pointer;
+    }
 
-        .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.4rem;
-        }
+    .flipped {
+        transform: rotateY(180deg);
+    }
 
-        .front {
-            background: #222;
-            border: 2px solid #444;
-            color: #ff4d6d;
-        }
+    .front, .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.4rem;
+    }
 
-        .active .front { border-color: #ff4d6d; }
+    .front {
+        background: #222;
+        border: 2px solid #444;
+        color: #ff4d6d;
+    }
 
-        .back {
-            background: #ff4d6d;
-            transform: rotateY(180deg);
-            overflow: hidden;
-        }
+    .active .front { border-color: #ff4d6d; }
 
-        .foto {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 15px;
-        }
+    .back {
+        background: #000;
+        transform: rotateY(180deg);
+        overflow: hidden;
+    }
 
-        .locked { opacity: 0.2; cursor: not-allowed; }
-    </style>
+    /* FOTO */
+    .foto {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15px;
+        transform: scale(1);
+        transition: transform 0.6s ease;
+    }
+
+    /* ZOOM QUANDO VIRA */
+    .flipped .foto {
+        transform: scale(1.08);
+    }
+
+    .locked { 
+        opacity: 0.2; 
+        cursor: not-allowed; 
+    }
+</style>
+```
+
 </head>
 <body>
 
-    <h1>🎁 Mêsversário S2</h1>
-    <p id="status-msg">Toque para virar!</p>
-    
-    <div class="grid" id="grid"></div>
+```
+<h1>🎁 Mêsversário S2</h1>
+<p id="status-msg">Toque para virar!</p>
 
-    <script>
-        const hojeNum = new Date().getDate();
-        const grid = document.getElementById("grid");
+<div class="grid" id="grid"></div>
 
-        let dados = JSON.parse(localStorage.getItem("recompensas_v_final")) || { coletados: [] };
+<script>
+    const hojeNum = new Date().getDate();
+    const grid = document.getElementById("grid");
 
-        function renderizar() {
-            grid.innerHTML = "";
-            for (let i = 1; i <= 30; i++) {
-                const card = document.createElement("div");
-                card.className = "day-card";
-                
-                const jaAbriu = dados.coletados.includes(i);
-                if (jaAbriu) card.classList.add("flipped");
+    let dados = JSON.parse(localStorage.getItem("recompensas_v_final")) || { coletados: [] };
 
-                if (i <= hojeNum) {
-                    card.classList.add("active");
-                    card.onclick = () => {
-                        if (!dados.coletados.includes(i)) {
-                            dados.coletados.push(i);
-                            localStorage.setItem("recompensas_v_final", JSON.stringify(dados));
-                            card.classList.add("flipped");
-                        }
-                    };
-                } else {
-                    card.classList.add("locked");
-                }
+    function renderizar() {
+        grid.innerHTML = "";
 
-                // 👇 AQUI ESTÁ A MUDANÇA
-                card.innerHTML = `
-                    <div class="front">${i}</div>
-                    <div class="back">
-                        <img src="imagens/${i}.jpg" class="foto">
-                    </div>
-                `;
+        for (let i = 1; i <= 30; i++) {
+            const card = document.createElement("div");
+            card.className = "day-card";
+            
+            const jaAbriu = dados.coletados.includes(i);
+            if (jaAbriu) card.classList.add("flipped");
 
-                grid.appendChild(card);
+            if (i <= hojeNum) {
+                card.classList.add("active");
+
+                card.onclick = () => {
+                    if (!dados.coletados.includes(i)) {
+                        dados.coletados.push(i);
+                        localStorage.setItem("recompensas_v_final", JSON.stringify(dados));
+                        card.classList.add("flipped");
+                    }
+                };
+
+            } else {
+                card.classList.add("locked");
             }
-        }
 
-        renderizar();
-    </script>
+            card.innerHTML = `
+                <div class="front">${i}</div>
+                <div class="back">
+                    <img src="imagens/${i}.jpg" class="foto">
+                </div>
+            `;
+
+            grid.appendChild(card);
+        }
+    }
+
+    renderizar();
+</script>
+```
+
 </body>
 </html>
